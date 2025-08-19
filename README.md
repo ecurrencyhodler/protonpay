@@ -2,6 +2,13 @@
 
 A minimal Chrome extension wallet for Bitcoin Lightning payments using the Voltage Payments API (v1).
 
+## Demo
+Here is a demo of creating an invoice and paying it using Voltage's test mutiny wallet environment:
+
+https://github.com/user-attachments/assets/13320824-ca8b-4790-a7ba-0a70ea1861a8
+
+
+
 ## Features
 
 - **Authentication**: Secure login with email and password
