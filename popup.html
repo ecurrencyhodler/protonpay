@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ProtonPay</title>
+  <link rel="stylesheet" href="styles/popup.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Login Screen -->
+    <div id="login-screen" class="screen">
+      <div class="header">
+        <h1>⚡ ProtonPay</h1>
+        <p>Lightning payments made simple</p>
+      </div>
+      
+      <form id="login-form" class="form">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Login</button>
+      </form>
+      
+      <div id="login-error" class="error-message hidden"></div>
+    </div>
+
+    <!-- Dashboard Screen -->
+    <div id="dashboard-screen" class="screen hidden">
+      <div class="header">
+        <h1>⚡ ProtonPay</h1>
+        <div class="header-actions">
+          <button id="open-window-btn" class="btn btn-secondary" title="Open in new window">📋</button>
+          <button id="logout-btn" class="btn btn-secondary">Logout</button>
+        </div>
+      </div>
+      
+      <!-- Balance Section -->
+      <div class="balance-section">
+        <h2>Balance</h2>
+        <div class="balance-amount">
+          <span id="balance-amount">--</span>
+          <span class="currency">sats</span>
+        </div>
+      </div>
+      
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <button id="send-btn" class="btn btn-primary">Send</button>
+        <button id="receive-btn" class="btn btn-primary">Receive</button>
+      </div>
+      
+      <!-- Transaction History -->
+      <div class="transactions-section">
+        <h3>Recent Transactions</h3>
+        <div id="transactions-list" class="transactions-list">
+          <div class="loading">Loading transactions...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Send Payment Screen -->
+    <div id="send-screen" class="screen hidden">
+      <div class="header">
+        <button id="back-to-dashboard" class="btn btn-secondary">← Back</button>
+        <h2>Send Payment</h2>
+      </div>
+      
+      <form id="send-form" class="form">
+        <div class="form-group">
+          <label for="invoice">Lightning Invoice</label>
+          <textarea id="invoice" placeholder="lnbc..." required></textarea>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Send Payment</button>
+      </form>
+      
+      <div id="send-status" class="status-message hidden"></div>
+    </div>
+
+    <!-- Receive Payment Screen -->
+    <div id="receive-screen" class="screen hidden">
+      <div class="header">
+        <button id="back-to-dashboard-receive" class="btn btn-secondary">← Back</button>
+        <h2>Receive Payment</h2>
+      </div>
+      
+      <form id="receive-form" class="form">
+        <div class="form-group">
+          <label for="amount">Amount (sats)</label>
+          <input type="number" id="amount" min="1" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="description">Description</label>
+          <input type="text" id="description" placeholder="Payment for...">
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Generate Invoice</button>
+      </form>
+      
+      <div id="invoice-display" class="invoice-display hidden">
+        <h3>Invoice Generated</h3>
+        <div class="invoice-text">
+          <textarea id="invoice-text" readonly></textarea>
+          <button id="copy-invoice" class="btn btn-secondary">Copy</button>
+        </div>
+        <div id="payment-status" class="status-message"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="scripts/popup.js"></script>
+</body>
+</html>

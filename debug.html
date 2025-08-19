@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ProtonPay Debug</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+    .result { margin: 10px 0; padding: 10px; background: #f0f0f0; }
+    .error { background: #ffebee; color: #c62828; }
+    .success { background: #e8f5e8; color: #2e7d32; }
+    button { padding: 10px 15px; margin: 5px; }
+    input { padding: 5px; margin: 5px; }
+  </style>
+</head>
+<body>
+  <h1>ProtonPay Debug Console</h1>
+  
+  <div class="test-section">
+    <h2>Backend API Test</h2>
+    <button onclick="testBackendBalance()">Test Backend Balance API</button>
+    <div id="backend-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Frontend Balance Processing Test</h2>
+    <button onclick="testFrontendBalance()">Test Frontend Balance Processing</button>
+    <div id="frontend-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Transaction History Test</h2>
+    <button onclick="testTransactionHistory()">Test Transaction History</button>
+    <div id="transaction-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Complete Flow Test</h2>
+    <button onclick="testCompleteFlow()">Test Complete Balance Flow</button>
+    <div id="complete-result" class="result"></div>
+  </div>
+
+  <script>
+    // Mock Chrome extension API
+    window.chrome = {
+      runtime: {
+        sendMessage: function(message, callback) {
+          // Simulate the background script response
+          if (message.action === 'getBalance') {
+            // Simulate the API call to backend
+            fetch('http://localhost:3000/wallet/balance', {
+              headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('testToken')
+              }
+            })
+            .then(response => response.json())
+            .then(data => {
+              console.log('Mock background: Balance API response:', data);
+              callback({ success: true, data: data });
+            })
+            .catch(error => {
+              console.error('Mock background: API error:', error);
+              callback({ success: false, error: error.message });
+            });
+          } else if (message.action === 'getTransactionHistory') {
+            // Simulate the API call to backend
+            fetch('http://localhost:3000/wallet/transactions', {
+              headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('testToken')
+              }
+            })
+            .then(response => response.json())
+            .then(data => {
+              console.log('Mock background: Transaction API response:', data);
+              callback({ success: true, data: data });
+            })
+            .catch(error => {
+              console.error('Mock background: API error:', error);
+              callback({ success: false, error: error.message });
+            });
+          }
+        }
+      }
+    };
+
+    async function testBackendBalance() {
+      const resultDiv = document.getElementById('backend-result');
+      resultDiv.innerHTML = 'Testing...';
+      
+      try {
+        // First register and login to get a token
+        const registerResponse = await fetch('http://localhost:3000/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: 'debug@test.com',
+            password: 'password123',
+            name: 'Debug User'
+          })
+        });
+        
+        const loginResponse = await fetch('http://localhost:3000/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: 'debug@test.com',
+            password: 'password123'
+          })
+        });
+        
+        const loginData = await loginResponse.json();
+        localStorage.setItem('testToken', loginData.token);
+        
+        // Now test the balance endpoint
+        const balanceResponse = await fetch('http://localhost:3000/wallet/balance', {
+          headers: {
+            'Authorization': 'Bearer ' + loginData.token
+          }
+        });
+        
+        const balanceData = await balanceResponse.json();
+        
+        resultDiv.innerHTML = `
+          <div class="success">
+            <strong>Backend Balance Test Success!</strong><br>
+            Response: ${JSON.stringify(balanceData, null, 2)}<br>
+            Balance: ${balanceData.balance}<br>
+            Currency: ${balanceData.currency}
+          </div>
+        `;
+      } catch (error) {
+        resultDiv.innerHTML = `
+          <div class="error">
+            <strong>Backend Balance Test Failed!</strong><br>
+            Error: ${error.message}
+          </div>
+        `;
+      }
+    }
+
+    function testFrontendBalance() {
+      const resultDiv = document.getElementById('frontend-result');
+      resultDiv.innerHTML = 'Testing...';
+      
+      // Simulate the frontend balance processing
+      const mockResponse = { success: true, data: { balance: 10000, currency: 'sats' } };
+      
+      console.log('Mock frontend: Balance response:', mockResponse);
+      console.log('Mock frontend: Response success:', mockResponse.success);
+      console.log('Mock frontend: Response data:', mockResponse.data);
+      console.log('Mock frontend: Response data.balance:', mockResponse.data?.balance);
+      console.log('Mock frontend: Response data type:', typeof mockResponse.data?.balance);
+      
+      if (mockResponse.success) {
+        const balance = mockResponse.data.balance?.toLocaleString() || '0';
+        console.log('Mock frontend: Setting balance to:', balance);
+        
+        resultDiv.innerHTML = `
+          <div class="success">
+            <strong>Frontend Balance Processing Success!</strong><br>
+            Original balance: ${mockResponse.data.balance}<br>
+            Formatted balance: ${balance}<br>
+            Currency: ${mockResponse.data.currency}
+          </div>
+        `;
+      } else {
+        resultDiv.innerHTML = `
+          <div class="error">
+            <strong>Frontend Balance Processing Failed!</strong><br>
+            Response not successful
+          </div>
+        `;
+      }
+    }
+
+    function testTransactionHistory() {
+      const resultDiv = document.getElementById('transaction-result');
+      resultDiv.innerHTML = 'Testing transaction history...';
+      
+      // Simulate the frontend transaction processing
+      chrome.runtime.sendMessage({ action: 'getTransactionHistory' }, (response) => {
+        console.log('Transaction history response:', response);
+        
+        if (response.success) {
+          const transactions = response.data.transactions || [];
+          
+          if (transactions.length === 0) {
+            resultDiv.innerHTML = `
+              <div class="success">
+                <strong>Transaction History Test Success!</strong><br>
+                No transactions found (empty history)
+              </div>
+            `;
+          } else {
+            const transactionList = transactions.map(tx => `
+              <div style="border: 1px solid #ccc; margin: 5px; padding: 10px;">
+                <strong>${tx.description}</strong><br>
+                Amount: ${tx.amount} sats<br>
+                Type: ${tx.type}<br>
+                State: ${tx.state}<br>
+                Date: ${new Date(tx.created_at).toLocaleString()}
+              </div>
+            `).join('');
+            
+            resultDiv.innerHTML = `
+              <div class="success">
+                <strong>Transaction History Test Success!</strong><br>
+                Found ${transactions.length} transaction(s):<br>
+                ${transactionList}
+              </div>
+            `;
+          }
+        } else {
+          resultDiv.innerHTML = `
+            <div class="error">
+              <strong>Transaction History Test Failed!</strong><br>
+              Error: ${response.error}
+            </div>
+          `;
+        }
+      });
+    }
+
+    async function testCompleteFlow() {
+      const resultDiv = document.getElementById('complete-result');
+      resultDiv.innerHTML = 'Testing complete flow...';
+      
+      try {
+        // Simulate the complete flow
+        chrome.runtime.sendMessage({ action: 'getBalance' }, (response) => {
+          console.log('Complete flow: Received response:', response);
+          
+          if (response.success) {
+            const balance = response.data.balance?.toLocaleString() || '0';
+            
+            resultDiv.innerHTML = `
+              <div class="success">
+                <strong>Complete Flow Test Success!</strong><br>
+                Backend response: ${JSON.stringify(response.data, null, 2)}<br>
+                Processed balance: ${balance}<br>
+                This would be displayed in the UI as: ${balance} sats
+              </div>
+            `;
+          } else {
+            resultDiv.innerHTML = `
+              <div class="error">
+                <strong>Complete Flow Test Failed!</strong><br>
+                Error: ${response.error}
+              </div>
+            `;
+          }
+        });
+      } catch (error) {
+        resultDiv.innerHTML = `
+          <div class="error">
+            <strong>Complete Flow Test Failed!</strong><br>
+            Error: ${error.message}
+          </div>
+        `;
+      }
+    }
+  </script>
+</body>
+</html>
